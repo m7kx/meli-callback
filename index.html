@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>OAuth callback</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font: 16px/1.5 system-ui, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 16px; }
+  textarea { width: 100%; box-sizing: border-box; font: 13px/1.4 ui-monospace, monospace; padding: 8px; }
+  button { font: inherit; padding: 8px 16px; margin-top: 8px; cursor: pointer; }
+  .warn { color: #b00020; }
+  small { opacity: .7; }
+</style>
+</head>
+<body>
+<h1>OAuth callback</h1>
+<p id="msg">Nenhum <code>code</code> nesta URL.</p>
+<textarea id="url" rows="4" readonly hidden></textarea>
+<button id="copy" hidden>Copiar URL</button>
+<p><small>Esta página não envia nada a lugar nenhum: só mostra o endereço para você colar em
+<code>meli-core exchange-code --redirect-url '...'</code>. O code é de uso único.</small></p>
+<script>
+  var p = new URLSearchParams(location.search);
+  var msg = document.getElementById('msg');
+  var box = document.getElementById('url');
+  var btn = document.getElementById('copy');
+  if (p.get('error')) {
+    msg.className = 'warn';
+    msg.textContent = 'Erro devolvido: ' + p.get('error') + (p.get('error_description') ? ' — ' + p.get('error_description') : '');
+  } else if (p.get('code')) {
+    msg.textContent = 'Autorização recebida. Copie a URL abaixo e cole no terminal:';
+    box.value = location.href; box.hidden = false; btn.hidden = false;
+    btn.onclick = function () {
+      box.select();
+      (navigator.clipboard ? navigator.clipboard.writeText(box.value) : Promise.reject())
+        .then(function () { btn.textContent = 'Copiado'; }, function () { document.execCommand('copy'); btn.textContent = 'Copiado'; });
+    };
+  }
+</script>
+</body>
+</html>
